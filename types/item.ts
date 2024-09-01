@@ -1,6 +1,6 @@
 export interface Item {
   date_prop_id: string;
-  description: string;
+  // description: string;
   id: string;
   image: string;
   instance_of: string[];
