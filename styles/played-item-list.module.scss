@@ -25,26 +25,26 @@
 
         .lowestLabel,
         .highestLabel {
-          position: absolute;
-          top: -28px;
+          position: fixed; // Change from absolute to fixed to make them stick
+          top: 575px; // Adjust as needed for visual alignment
           font-size: 18px;
           font-weight: bold;
           color: $text;
-          rotate: 40deg;
+          rotate: -40deg; // Adjust rotation angle as needed
           background-color: $primary;
           padding: 5px 10px;
           border-radius: 5px;
           color: $text-light;
+          z-index: 1000; // Ensure the labels are always on top
         }
 
         .lowestLabel {
-          left: 0;  // Position label at the start (left)
+          left: 10px; // Adjust this value for better placement if needed
         }
 
         .highestLabel {
-          right: 0;  // Position label at the end (right)
+          right: 10px; // Adjust this value for better placement if needed
         }
-
       }
     }
 

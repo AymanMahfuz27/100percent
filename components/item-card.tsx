@@ -43,13 +43,15 @@ export default function ItemCard(props: Props) {
             <div className={styles.front}>
               <div className={styles.top}>
                 <div className={styles.label}>{item.label}</div>
-                {/* <div className={styles.description}>{item.description}</div> */}
               </div>
-              <div className={styles.bottom}>
+              <div
+                className={classNames(styles.bottom, {
+                  [styles.correct]: "played" in item && item.played.correct,
+                  [styles.incorrect]: "played" in item && !item.played.correct,
+                })}
+              >
                 <span>
-                  {"played" in item
-                    ? `${item.year}%`
-                    : ""}
+                  {"played" in item ? `${item.year}%` : ""}
                 </span>
               </div>
             </div>
@@ -59,4 +61,3 @@ export default function ItemCard(props: Props) {
     </Draggable>
   );
 }
-
