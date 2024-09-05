@@ -13,6 +13,7 @@
   .back {
     display: flex;
     flex-direction: column;
+    justify-content: space-between; // Ensure the bottom stays at the bottom
     position: absolute;
     top: 0;
     right: 0;
@@ -65,23 +66,17 @@
   }
 
   .front {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; // Push bottom to the bottom
+    height: 100%;
+
     .top {
       padding: 10px;
     }
 
     .image {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      flex-grow: 1;
-      min-height: 0;
-      background-color: $background-alt;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: 50% 25%;
-      padding: 10px;
-      padding-bottom: 0;
-      color: $text-light;
+      display: none;
     }
 
     .bottom {
@@ -93,6 +88,8 @@
       background-color: $primary;
       color: $text-light;
       border-radius: 0 0 $box-border-radius $box-border-radius;
+      padding: 10px 0;
+      margin-top: auto; // Push the bottom to the bottom
       transition: background-color 5s ease-in-out;
 
       &:hover {

@@ -45,7 +45,6 @@ export default function ItemCard(props: Props) {
                 <div className={styles.label}>{item.label}</div>
                 {/* <div className={styles.description}>{item.description}</div> */}
               </div>
-              <div className={styles.image}></div>
               <div className={styles.bottom}>
                 <span>
                   {"played" in item
@@ -60,3 +59,4 @@ export default function ItemCard(props: Props) {
     </Draggable>
   );
 }
+

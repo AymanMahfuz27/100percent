@@ -8,7 +8,6 @@
   .listContainer {
     width: min-content;
     min-width: 100%;
-    // 20px more on the left because the right has extra 20px margin-right from cards
     padding: 0 40px 0 60px;
     height: 100%;
     position: relative;
@@ -28,11 +27,13 @@
     .list {
       display: flex;
       align-items: center;
+      justify-content: center; // Center the items within the list
       height: 100%;
 
       .items {
         display: flex;
         align-items: center;
+        justify-content: center; // Ensure the items are centered
       }
     }
   }
