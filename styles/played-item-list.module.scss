@@ -21,6 +21,30 @@
         width: 100%;
         height: 1px;
         border: 1px dashed $dashes;
+        position: relative;
+
+        .lowestLabel,
+        .highestLabel {
+          position: absolute;
+          top: -28px;
+          font-size: 18px;
+          font-weight: bold;
+          color: $text;
+          rotate: 40deg;
+          background-color: $primary;
+          padding: 5px 10px;
+          border-radius: 5px;
+          color: $text-light;
+        }
+
+        .lowestLabel {
+          left: 0;  // Position label at the start (left)
+        }
+
+        .highestLabel {
+          right: 0;  // Position label at the end (right)
+        }
+
       }
     }
 

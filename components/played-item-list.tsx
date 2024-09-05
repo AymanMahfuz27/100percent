@@ -32,7 +32,10 @@ export default function PlayedItemList(props: PlayedItemListProps) {
               className={styles.list}
             >
               <div className={styles.timelineContainer}>
-                <div className={styles.timeline}></div>
+                <div className={styles.timeline}>
+                  <span className={styles.lowestLabel}>Lowest</span>
+                  <span className={styles.highestLabel}>Highest</span>
+                </div>
               </div>
               <div className={styles.items}>
                 {items.map((item, index) => (
