@@ -55,6 +55,12 @@ export default function ItemCard(props: Props) {
                 </span>
               </div>
             </div>
+            <div className={styles.back}>
+              <div className={styles.labelBack}>{item.label}</div>
+              <div className={styles.percentageBack}>
+                {item.year}%
+              </div>
+            </div>
           </div>
         );
       }}

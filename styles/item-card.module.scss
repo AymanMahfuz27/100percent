@@ -8,6 +8,7 @@
   margin-bottom: 20px;
   margin-right: 20px;
   position: relative;
+  perspective: 1000px; // Enable 3D space for flipping
 
   .front,
   .back {
@@ -22,20 +23,68 @@
     border-radius: $box-border-radius;
     box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
       rgba(0, 0, 0, 0.23) 0px 6px 6px;
-    background-color: #ffffff;
-    will-change: transform, opacity;
+    backface-visibility: hidden; // Hide the back face while not flipped
+    transition: transform 0.6s ease-in-out, background-color 0.3s ease-in-out;
+  }
 
-    &::after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      border-radius: $box-border-radius;
-      box-shadow: rgba(0, 0, 0, 0.65) 0px 10px 25px,
-        rgba(0, 0, 0, 0.75) 0px 6px 12px;
-      transition: opacity 0.3s ease-in-out;
+  .front {
+    background-color: #ffffff;
+    transform: rotateY(0);
+
+    .top {
+      padding: 15px 10px; // Increased padding at the top for better spacing
+    }
+
+    .bottom {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      line-height: 30px;
+      font-weight: 700;
+      background-color: $primary;
+      color: $text-light;
+      border-radius: 0 0 $box-border-radius $box-border-radius;
+      padding: 10px 0;
+      margin-top: auto; // Push the bottom to the bottom
+      width: 100%; // Make sure the bottom stretches fully
+      box-sizing: border-box; // Ensure the padding is considered within the width
+
+      &:hover {
+        background-color: #ad310b;
+      }
+
+      &.correct {
+        background-color: $correct; // Green color for correct
+      }
+
+      &.incorrect {
+        background-color: $incorrect; // Red color for incorrect
+      }
+    }
+  }
+
+  .back {
+    background-color: $text-muted; // Use muted color for the back
+    transform: rotateY(-180deg); // Start with the back side flipped out of view
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: $text-light; // Ensure text is visible on muted background
+    padding: 10px;
+    border-radius: $box-border-radius;
+
+    .labelBack {
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .percentageBack {
+      font-size: 32px; // Make the percentage larger
+      font-weight: bold;
+      text-align: center;
     }
   }
 
@@ -57,82 +106,21 @@
 
   &.flipped {
     .front {
+      transform: rotateY(180deg); // Flip the front out of view
       z-index: -1;
     }
 
     .back {
+      transform: rotateY(0); // Ensure the back is shown when flipped
       z-index: initial;
-    }
-  }
-
-  .front {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; // Push bottom to the bottom
-    height: 100%;
-
-    .top {
-      padding: 10px;
-    }
-
-    .image {
-      display: none;
-    }
-
-    .bottom {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      line-height: 30px;
-      font-weight: 700;
-      background-color: $primary;
-      color: $text-light;
-      border-radius: 0 0 $box-border-radius $box-border-radius;
-      padding: 10px 0;
-      margin-top: auto; // Push the bottom to the bottom
-      transition: background-color 5s ease-in-out;
-
-      &:hover {
-        background-color: #ad310b;
-      }
-
-      &.correct {
-        background-color: $correct;
-      }
-
-      &.incorrect {
-        background-color: $incorrect;
-      }
-    }
-  }
-
-  .back {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 10px;
-    z-index: -1;
-
-    .description {
-      overflow: auto;
-      flex-grow: 1;
-      color: $text;
-    }
-
-    .wikipedia {
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .date {
-      margin-top: 5px;
-      font-size: 12px;
     }
   }
 
   .label {
     font-weight: bold;
     word-wrap: break-word;
+    font-size: 14px; // Ensure the label text is appropriately sized
+    text-align: center;
   }
 
   .description {
