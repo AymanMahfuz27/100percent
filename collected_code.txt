@@ -6,73 +6,6 @@
 // see https://nextjs.org/docs/basic-features/typescript for more information.
 
 
-# package.json
-{
-  "name": "wiki-history-game-www",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss,json,yml}\"",
-    "lint": "eslint --max-warnings=0 --cache --ext .js,.ts,.tsx .",
-    "lint-fix": "eslint --fix --cache --ext .js,.ts,.tsx .",
-    "start": "next start"
-  },
-  "dependencies": {
-    "axios": "^1.6.7",
-    "classnames": "^2.3.1",
-    "next": "^14.1.1",
-    "react": "18.2.0",
-    "react-beautiful-dnd": "^13.1.1",
-    "react-dom": "18.2.0",
-    "react-github-btn": "^1.2.1",
-    "react-loader-spinner": "^4.0.0",
-    "react-spring": "^9.7.3",
-    "seamless-scroll-polyfill": "^1.2.3",
-    "tween-functions": "^1.2.0"
-  },
-  "devDependencies": {
-    "@types/node": "^14.14.41",
-    "@types/react": "^17.0.3",
-    "@types/react-beautiful-dnd": "^13.0.0",
-    "@types/react-no-ssr": "^1.1.1",
-    "@typescript-eslint/eslint-plugin": "^6.21.0",
-    "@typescript-eslint/parser": "^6.21.0",
-    "eslint": "^8.56.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "prettier": "^2.5.1",
-    "sass": "^1.32.10",
-    "typescript": "^5.3.3"
-  }
-}
-
-
-# tsconfig.json
-{
-  "compilerOptions": {
-    "typeRoots": ["@types", "node_modules/@types"],
-    "target": "es5",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true
-  },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
-  "exclude": ["node_modules"]
-}
-
-
 # @types\tween-functions.d.ts
 declare module "tween-functions" {
   export const easeOutCirc: (
@@ -347,7 +280,7 @@ import Instructions from "./instructions";
 import badCards from "../lib/bad-cards";
 
 const data = {
-  "Republicans say they would be pleased if the supreme court reduced abortion rights?": 43,
+"Republicans say they would be pleased if the supreme court reduced abortion rights?": 43,
 "Republicans say that abortion should never be permitted?": 19,
 "Republicans are willing to open up protected nature areas for economic development?": 16,
 "Republicans say that the US spends too much on alternative energy sources?": 23,
@@ -629,15 +562,22 @@ export default function ItemCard(props: Props) {
             <div className={styles.front}>
               <div className={styles.top}>
                 <div className={styles.label}>{item.label}</div>
-                {/* <div className={styles.description}>{item.description}</div> */}
               </div>
-              <div className={styles.image}></div>
-              <div className={styles.bottom}>
+              <div
+                className={classNames(styles.bottom, {
+                  [styles.correct]: "played" in item && item.played.correct,
+                  [styles.incorrect]: "played" in item && !item.played.correct,
+                })}
+              >
                 <span>
-                  {"played" in item
-                    ? `${item.year}%`
-                    : ""}
+                  {"played" in item ? `${item.year}%` : ""}
                 </span>
+              </div>
+            </div>
+            <div className={styles.back}>
+              <div className={styles.labelBack}>{item.label}</div>
+              <div className={styles.percentageBack}>
+                {item.year}%
               </div>
             </div>
           </div>
@@ -646,7 +586,6 @@ export default function ItemCard(props: Props) {
     </Draggable>
   );
 }
-
 
 
 # components\loading.tsx
@@ -736,7 +675,10 @@ export default function PlayedItemList(props: PlayedItemListProps) {
               className={styles.list}
             >
               <div className={styles.timelineContainer}>
-                <div className={styles.timeline}></div>
+                <div className={styles.timeline}>
+                  <span className={styles.lowestLabel}>Lowest</span>
+                  <span className={styles.highestLabel}>Highest</span>
+                </div>
               </div>
               <div className={styles.items}>
                 {items.map((item, index) => (
@@ -788,397 +730,6 @@ export default function Score(props: Props) {
       <div className={styles.value}>{score}</div>
     </div>
   );
-}
-
-
-# lib\bad-cards.ts
-const badCards = {
-  Q745019: "Colt's Manufacturing Company",
-  Q697675: "Gigabyte Technology",
-  Q157064: "Puma (brand)",
-  Q179900: "David (Michelangelo)",
-  Q218567: "Law & Order SVU",
-  Q486682: "Crips",
-  Q12871: "Simon the Zealot",
-  Q5505: "Lake Victoria",
-  Q58784: "Das Kapital",
-  Q345: "Virgin Mary",
-  Q184742: "Metamorphoses",
-  Q128267: "Joseph",
-  Q60220: "Aeneid",
-  Q25716: "1st millennium BC",
-  Q134862: "Champagne",
-  Q207193: "Skellig Michael",
-  Q38526: "1,000,000",
-  Q193159: "Russian Armed Forces",
-  Q43343: "Folk music",
-  Q10282403: "Surgical mask",
-  Q46197: "Ascension",
-  Q132851: "Admiral",
-  Q55629: "Epsom Derby",
-  Q828435: "Spanish conquest of the Aztec Empire",
-  Q460584: "Scala",
-  Q244157: "Igbo people",
-  Q1990219: "French colonization of the Americas",
-  Q321303: "The Garden of Earthly Delights",
-  Q9730: "Classical music",
-  Q221062: "DuPont",
-  Q39427: "Surrealism",
-  Q219995: "Guanches",
-  Q833163: "Knight Bachelor",
-  Q42233: "Sickle",
-  Q80290: "Forbidden City",
-  Q39950: "Vedas",
-  Q468836: "Raedwald of East Anglia",
-  Q73801: "Xbox Game Studios",
-  Q81018: "Judas Iscariot",
-  Q528187: "Pringles",
-  Q187846: "Russian Alphabet",
-  Q99309: "Pantheon, Rome",
-  Q55: "Netherlands",
-  Q80344: "Mount Olympus",
-  Q161718: "United Nations Development Programme",
-  Q3293295: "Turkish Naval Forces",
-  Q1059358: "Rubáiyát of Omar Khayyám",
-  Q82996: "Runes",
-  Q106187: "Giant's Causeway",
-  Q213804: "Lindisfarne",
-  Q229702: "Ham (son of Noah)",
-  Q830183: "Eve",
-  Q44996: "The Oxford English Dictionary",
-  Q212746: "Anglo-Saxon Chronicle",
-  Q41726: "Freemasonry",
-  Q142: "France",
-  Q115: "Ethiopia",
-  Q12263: "Mahjong",
-  Q213633: "Deborah",
-  Q7734: "Joshua",
-  Q202466: "Blond",
-  Q94787: "Sunflower Oil",
-  Q174640: "V-2 Rocket",
-  Q1616457: "Mycroft Holmes",
-  Q302: "Jesus",
-  Q84422877: "Samaritan woman",
-  Q917374: "Norwegian Armed Forces",
-  Q718: "Chess",
-  Q183: "Germany",
-  Q38: "Italy",
-  Q1649955: "Scarlett O'Hara",
-  Q1768161: "Abraham in Islam",
-  Q11768: "Ancient Egypt",
-  Q304673: "Platoon",
-  Q43982: "Bartholomew the Apostle",
-  Q36: "Poland",
-  Q47128: "Christmas Tree",
-  Q242382: "Thusnelda",
-  Q1069785: "Hong Kong Flu",
-  Q183562: "Umayyad Mosque",
-  Q82613: "Krakatoa",
-  Q459188: "Kingdom of the Isles",
-  Q465283: "Russian Navy",
-  Q461606: "Arsène Lupin",
-  Q304690: "Li Ching-Yuen",
-  Q2001966: "Company rule in India",
-  Q651532: "The Three Little Pigs",
-  Q184661: "Ogham",
-  Q31057: "Norfolk Island",
-  Q1246283: "Kumbhalgarh",
-  Q735349: "Russian conquest of Siberia",
-  Q2223341: "Elizabeth Bennet",
-  Q40185: "Divine Comedy",
-  Q2723024: "Enron scandal",
-  Q133600: "Banksy",
-  Q14112: "Corsica",
-  Q1892745: "Salvator Mundi (Leonardo)",
-  Q994776: "Brutalist architecture",
-  Q182865: "War in Afghanistan",
-  Q936394: "Pornhub",
-  Q466683: "Chyna",
-  Q824540: "AVN Awards",
-  Q19559884: "August Ames",
-  Q2709: "Sasha Grey",
-  Q260794: "Sunny Leone",
-  Q973475: "Dustin Diamond",
-  Q3700050: "XVideos",
-  Q18735049: "Mia Khalifa",
-  Q233118: "Traci Lords",
-  Q3916703: "Riley Reid",
-  Q18749736: "Johnny Sins",
-  Q65115154: "Belle Delphine",
-  Q739550: "M&M's",
-  Q1431121: "St Michael's Mount",
-  Q174097: "Hogwarts",
-  Q8690: "Cultural Revolution",
-  Q149086: "Homicide"
-};
-
-export default badCards;
-
-
-# lib\create-state.ts
-import { GameState } from "../types/game";
-import { Item } from "../types/item";
-import { getRandomItem, preloadImage } from "./items";
-
-export default async function createState(deck: Item[]): Promise<GameState> {
-  const played = [{ ...getRandomItem(deck, []), played: { correct: true } }];
-  const next = getRandomItem(deck, played);
-  const nextButOne = getRandomItem(deck, [...played, next]);
-  const imageCache = [preloadImage(next.image), preloadImage(nextButOne.image)];
-
-  return {
-    badlyPlaced: null,
-    deck,
-    imageCache,
-    lives: 6,
-    next,
-    nextButOne,
-    played,
-  };
-}
-
-
-# lib\image.ts
-export function createWikimediaImage(image: string, width = 300): string {
-  return `https://commons.wikimedia.org/w/index.php?title=Special:Redirect/file/${encodeURIComponent(
-    image
-  )}&width=${width}`;
-}
-
-
-# lib\items.ts
-import { Item, PlayedItem } from "../types/item";
-import { createWikimediaImage } from "./image";
-
-export function getRandomItem(deck: Item[], played: Item[]): Item {
-  const candidates = deck.filter((candidate) => {
-    if (tooClose(candidate, played)) {
-      return false;
-    }
-    return true;
-  });
-
-  if (candidates.length > 0) {
-    return candidates[Math.floor(Math.random() * candidates.length)];
-  }
-  return deck[Math.floor(Math.random() * deck.length)];
-}
-
-function tooClose(item: Item, played: Item[]) {
-  let distance = (played.length < 40) ? 5 : 1;
-  if (played.length < 11)
-    distance = 110 - 10 * played.length;
-
-  return played.some((p) => Math.abs(item.year - p.year) < distance);
-}
-
-
-export function checkCorrect(
-  played: PlayedItem[],
-  item: Item,
-  index: number
-): { correct: boolean; delta: number } {
-  const sorted = [...played, item].sort((a, b) => a.year - b.year); // Compare based on percentages (year now represents percentage)
-  const correctIndex = sorted.findIndex((i) => i.id === item.id);
-
-  if (index !== correctIndex) {
-    return { correct: false, delta: correctIndex - index };
-  }
-
-  return { correct: true, delta: 0 };
-}
-
-export function preloadImage(url: string): HTMLImageElement {
-  const img = new Image();
-  img.src = createWikimediaImage(url);
-  return img;
-}
-
-
-# lib\timelineData.ts
-export const timelineData = {
-    "Republicans say they would be pleased if the supreme court reduced abortion rights?": 43,
-  "Republicans say that abortion should never be permitted?": 19,
-  "Republicans are willing to open up protected nature areas for economic development?": 16,
-  "Republicans say that the US spends too much on alternative energy sources?": 23,
-  "Republicans support laws that protect gays and lesbians against job discrimination?": 81,
-  "Republicans support requiring background checks for gun purchases at gun shows or private sales?": 82,
-  "Republicans say that the government should make it easier to buy a gun?": 11,
-  "Republicans say that the US spends too much on the nation's health?": 16,
-  "Republicans support making all unauthorized immigrants felons and sending them back?": 24,
-  "Republicans support sending back children who were brought to the US illegally and have lived here for 10+ years?": 21,
-  "Republicans say that the federal minimum wage should be decreased?": 4,
-  "Republicans oppose requiring employers to offer paid leave to parents of new children?": 13,
-  "Republicans say that the police officers never use more force than necessary?": 3,
-  "Republicans support requiring police officers to wear body cameras while on duty?": 88,
-  "Republicans say that blacks face no discrimination at all in the US?": 5,
-  "Republicans believe that the legacy of slavery affects the position of black people in society today?": 68,
-  "Republicans think that high-income individuals pay the right amount in taxes?": 29,
-  "Republicans say that eligible voters are never denied the right to vote?": 23,
-  "Democrats believe that climate change has been mostly due to human activity?": 69,
-  "Democrats are unwilling to pay much higher prices in order to protect the environment?": 17,
-  "Democrats support the death penalty for convicted murderers?": 44,
-  "Democrats oppose making free trade agreements with other countries?": 7,
-  "Democrats support lowering the eligibility age for Medicare from 65 to 50?": 77,
-  "Democrats feel that courts deal too harshly with criminals?": 40,
-  "Democrats say that the US spends too much on reducing crime rates?": 8,
-  "Democrats believe that the legacy of slavery affects the position of black people in society today?": 97,
-  "Democrats think that high-income individuals pay too little in taxes?": 75,
-  "Democrats say that transgender people face no discrimination at all in the US?": 7,
-  "Democrats support requiring showing a government photo ID when voting?": 48,
-  "Democrats say that eligible voters are never denied the right to vote?": 7,
-  "Democrats say that the US spends too little on assistance to the poor?": 44,
-  "Adults say they would like to bring back dinosaurs?": 12,
-  "Adults say that chocolate glazed donuts are their favorite donuts?": 12,
-  "Adults in a relationship met their partner online?": 12,
-  "Adults have at least one tattoo?": 26,
-  "Adults are single?": 31,
-  "Adults consider a hotdog to be a sandwich?": 36,
-  "Adults believe in ghosts?": 36,
-  "Adults like their eggs scrambled?": 37,
-  "Adults believe in UFOs?": 39,
-  "Dog owners got their dogs from a shelter?": 40,
-  "Adults set an alarm but do not snooze when waking up?": 40,
-  "Pet owners dress up their pets for Halloween?": 45,
-  "Adults say they drink coffee every day?": 62,
-  "TV-owning adults watched Neil Armstrong set foot on the moon?": 94,
-  "Adults say they have had a teacher who changed their life for the better?": 94,
-  "Households are dog owners?": 54,
-  "Adults in a relationship say they are satisfied with their relationship?": 94,
-  };
-  
-  export interface TimelineItem {
-    id: string;
-    statement: string;
-    percentage: number;
-  }
-  
-  export function getTimelineItems(): TimelineItem[] {
-    return Object.entries(timelineData).map(([statement, percentage], index) => ({
-      id: `item-${index}`,
-      statement,
-      percentage,
-    }));
-  }
-
-# lib\useAutoMoveSensor.ts
-import { FluidDragActions, SensorAPI } from "react-beautiful-dnd";
-import * as tweenFunctions from "tween-functions";
-import { GameState } from "../types/game";
-
-function moveStepByStep(
-  drag: FluidDragActions,
-  transformValues: number[],
-  scrollValues: number[]
-) {
-  requestAnimationFrame(() => {
-    const bottom = document.getElementById("bottom");
-
-    if (bottom === null) {
-      throw new Error("Can't find #bottom");
-    }
-
-    const newPosition = transformValues.shift();
-    const newScroll = scrollValues.shift();
-
-    if (newPosition === undefined || newScroll === undefined) {
-      drag.drop();
-    } else {
-      bottom.scrollLeft = newScroll;
-      drag.move({ x: newPosition, y: 0 });
-      moveStepByStep(drag, transformValues, scrollValues);
-    }
-  });
-}
-
-export default async function useAutoMoveSensor(
-  state: GameState,
-  api: SensorAPI
-) {
-  if (
-    state.badlyPlaced === null ||
-    state.badlyPlaced.index === null ||
-    state.badlyPlaced.rendered === false
-  ) {
-    return;
-  }
-
-  const preDrag = api.tryGetLock?.(state.played[state.badlyPlaced.index].id);
-
-  if (!preDrag) {
-    return;
-  }
-
-  const itemEl: HTMLElement | null = document.querySelector(
-    `[data-rbd-draggable-id='${state.played[state.badlyPlaced.index].id}']`
-  );
-  const destEl: HTMLElement | null = document.querySelector(
-    `[data-rbd-draggable-id='${
-      state.played[state.badlyPlaced.index + state.badlyPlaced.delta].id
-    }']`
-  );
-  const bottomEl: HTMLElement | null = document.getElementById("bottom");
-
-  if (itemEl === null || destEl === null || bottomEl === null) {
-    throw new Error("Can't find element");
-  }
-
-  const bottomElCentreLeft = bottomEl.scrollLeft + bottomEl.clientWidth / 4;
-  const bottomElCentreRight =
-    bottomEl.scrollLeft + (bottomEl.clientWidth / 4) * 3 - itemEl.clientWidth;
-
-  let scrollDistance = 0;
-
-  if (
-    destEl.offsetLeft < bottomElCentreLeft ||
-    destEl.offsetLeft > bottomElCentreRight
-  ) {
-    // Destination is not in middle two quarters of the screen. Calculate
-    // distance we therefore need to scroll.
-    scrollDistance =
-      destEl.offsetLeft < bottomElCentreLeft
-        ? destEl.offsetLeft - bottomElCentreLeft
-        : destEl.offsetLeft - bottomElCentreRight;
-
-    if (bottomEl.scrollLeft + scrollDistance < 0) {
-      scrollDistance = -bottomEl.scrollLeft;
-    } else if (
-      bottomEl.scrollLeft + scrollDistance >
-      bottomEl.scrollWidth - bottomEl.clientWidth
-    ) {
-      scrollDistance =
-        bottomEl.scrollWidth - bottomEl.clientWidth - bottomEl.scrollLeft;
-    }
-  }
-
-  // Calculate the distance we need to move the item after taking into account
-  // how far we are scrolling.
-  const transformDistance =
-    destEl.offsetLeft - itemEl.offsetLeft - scrollDistance;
-
-  const drag = preDrag.fluidLift({ x: 0, y: 0 });
-
-  // Create a series of eased transformations and scrolls to animate from the
-  // current state to the desired state.
-  const transformPoints = [];
-  const scrollPoints = [];
-  const numberOfPoints = 30 + 5 * Math.abs(state.badlyPlaced.delta);
-
-  for (let i = 0; i < numberOfPoints; i++) {
-    transformPoints.push(
-      tweenFunctions.easeOutCirc(i, 0, transformDistance, numberOfPoints)
-    );
-    scrollPoints.push(
-      tweenFunctions.easeOutCirc(
-        i,
-        bottomEl.scrollLeft,
-        bottomEl.scrollLeft + scrollDistance,
-        numberOfPoints
-      )
-    );
-  }
-
-  moveStepByStep(drag, transformPoints, scrollPoints);
 }
 
 
@@ -1420,11 +971,13 @@ a {
   margin-bottom: 20px;
   margin-right: 20px;
   position: relative;
+  perspective: 1000px; // Enable 3D space for flipping
 
   .front,
   .back {
     display: flex;
     flex-direction: column;
+    justify-content: space-between; // Ensure the bottom stays at the bottom
     position: absolute;
     top: 0;
     right: 0;
@@ -1433,20 +986,68 @@ a {
     border-radius: $box-border-radius;
     box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
       rgba(0, 0, 0, 0.23) 0px 6px 6px;
-    background-color: #ffffff;
-    will-change: transform, opacity;
+    backface-visibility: hidden; // Hide the back face while not flipped
+    transition: transform 0.6s ease-in-out, background-color 0.3s ease-in-out;
+  }
 
-    &::after {
-      content: "";
-      position: absolute;
-      z-index: -1;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      border-radius: $box-border-radius;
-      box-shadow: rgba(0, 0, 0, 0.65) 0px 10px 25px,
-        rgba(0, 0, 0, 0.75) 0px 6px 12px;
-      transition: opacity 0.3s ease-in-out;
+  .front {
+    background-color: #ffffff;
+    transform: rotateY(0);
+
+    .top {
+      padding: 15px 10px; // Increased padding at the top for better spacing
+    }
+
+    .bottom {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      line-height: 30px;
+      font-weight: 700;
+      background-color: $primary;
+      color: $text-light;
+      border-radius: 0 0 $box-border-radius $box-border-radius;
+      padding: 10px 0;
+      margin-top: auto; // Push the bottom to the bottom
+      width: 100%; // Make sure the bottom stretches fully
+      box-sizing: border-box; // Ensure the padding is considered within the width
+
+      &:hover {
+        background-color: #ad310b;
+      }
+
+      &.correct {
+        background-color: $correct; // Green color for correct
+      }
+
+      &.incorrect {
+        background-color: $incorrect; // Red color for incorrect
+      }
+    }
+  }
+
+  .back {
+    background-color: $text-muted; // Use muted color for the back
+    transform: rotateY(-180deg); // Start with the back side flipped out of view
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: $text-light; // Ensure text is visible on muted background
+    padding: 10px;
+    border-radius: $box-border-radius;
+
+    .labelBack {
+      font-size: 16px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .percentageBack {
+      font-size: 32px; // Make the percentage larger
+      font-weight: bold;
+      text-align: center;
     }
   }
 
@@ -1468,86 +1069,21 @@ a {
 
   &.flipped {
     .front {
+      transform: rotateY(180deg); // Flip the front out of view
       z-index: -1;
     }
 
     .back {
+      transform: rotateY(0); // Ensure the back is shown when flipped
       z-index: initial;
-    }
-  }
-
-  .front {
-    .top {
-      padding: 10px;
-    }
-
-    .image {
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      flex-grow: 1;
-      min-height: 0;
-      background-color: $background-alt;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: 50% 25%;
-      padding: 10px;
-      padding-bottom: 0;
-      color: $text-light;
-    }
-
-    .bottom {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      line-height: 30px;
-      font-weight: 700;
-      background-color: $primary;
-      color: $text-light;
-      border-radius: 0 0 $box-border-radius $box-border-radius;
-      transition: background-color 5s ease-in-out;
-
-      &:hover {
-        background-color: #ad310b;
-      }
-
-      &.correct {
-        background-color: $correct;
-      }
-
-      &.incorrect {
-        background-color: $incorrect;
-      }
-    }
-  }
-
-  .back {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 10px;
-    z-index: -1;
-
-    .description {
-      overflow: auto;
-      flex-grow: 1;
-      color: $text;
-    }
-
-    .wikipedia {
-      margin-top: 10px;
-      text-align: center;
-    }
-
-    .date {
-      margin-top: 5px;
-      font-size: 12px;
     }
   }
 
   .label {
     font-weight: bold;
     word-wrap: break-word;
+    font-size: 14px; // Ensure the label text is appropriately sized
+    text-align: center;
   }
 
   .description {
@@ -1609,7 +1145,6 @@ a {
   .listContainer {
     width: min-content;
     min-width: 100%;
-    // 20px more on the left because the right has extra 20px margin-right from cards
     padding: 0 40px 0 60px;
     height: 100%;
     position: relative;
@@ -1623,17 +1158,43 @@ a {
         width: 100%;
         height: 1px;
         border: 1px dashed $dashes;
+        position: relative;
+
+        .lowestLabel,
+        .highestLabel {
+          position: fixed; // Change from absolute to fixed to make them stick
+          top: 575px; // Adjust as needed for visual alignment
+          font-size: 18px;
+          font-weight: bold;
+          color: $text;
+          rotate: -40deg; // Adjust rotation angle as needed
+          background-color: $primary;
+          padding: 5px 10px;
+          border-radius: 5px;
+          color: $text-light;
+          z-index: 1000; // Ensure the labels are always on top
+        }
+
+        .lowestLabel {
+          left: 10px; // Adjust this value for better placement if needed
+        }
+
+        .highestLabel {
+          right: 10px; // Adjust this value for better placement if needed
+        }
       }
     }
 
     .list {
       display: flex;
       align-items: center;
+      justify-content: center; // Center the items within the list
       height: 100%;
 
       .items {
         display: flex;
         align-items: center;
+        justify-content: center; // Ensure the items are centered
       }
     }
   }

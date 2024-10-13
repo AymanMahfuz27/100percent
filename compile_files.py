@@ -1,9 +1,9 @@
 import os
 
 # Define the directories and files to ignore
-IGNORE_DIRS = {"public", "node_modules", ".vscode", ".next", ".github"}
+IGNORE_DIRS = {"public", "node_modules", ".vscode", ".next", ".github", "lib"}
 IGNORE_FILES = {"package-lock.json","bad-cards.tsx"}
-FILE_EXTENSIONS = {".tsx", ".ts", ".scss", ".json"}
+FILE_EXTENSIONS = {".tsx", ".ts", ".scss"}
 OUTPUT_FILE = "collected_code.txt"
 
 def collect_files(root_dir):

@@ -1,15 +1,13 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { GameState } from "../types/game";
 import { Item } from "../types/item";
 import createState from "../lib/create-state";
 import Board from "./board";
 import Loading from "./loading";
 import Instructions from "./instructions";
-import badCards from "../lib/bad-cards";
 
 const data = {
-  "Republicans say they would be pleased if the supreme court reduced abortion rights?": 43,
+"Republicans say they would be pleased if the supreme court reduced abortion rights?": 43,
 "Republicans say that abortion should never be permitted?": 19,
 "Republicans are willing to open up protected nature areas for economic development?": 16,
 "Republicans say that the US spends too much on alternative energy sources?": 23,
