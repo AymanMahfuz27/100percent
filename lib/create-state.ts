@@ -1,20 +1,30 @@
 import { GameState } from "../types/game";
 import { Item } from "../types/item";
-import { getRandomItem, preloadImage } from "./items";
+import { getNextItem, preloadImage } from "./items";
 
 export default async function createState(deck: Item[]): Promise<GameState> {
-  const played = [{ ...getRandomItem(deck, []), played: { correct: true } }];
-  const next = getRandomItem(deck, played);
-  const nextButOne = getRandomItem(deck, [...played, next]);
-  const imageCache = [preloadImage(next.image), preloadImage(nextButOne.image)];
+  const firstItem = getNextItem(deck, []);
+  if (!firstItem) {
+    throw new Error("Deck is empty or has no valid items");
+  }
+
+  const played = [{ ...firstItem, played: { correct: true } }];
+  const next = getNextItem(deck, played);
+  const nextButOne = getNextItem(deck, [...played, ...(next ? [next] : [])]);
+
+  const imageCache = [
+    ...(next ? [await preloadImage(next.image)] : []),
+    ...(nextButOne ? [await preloadImage(nextButOne.image)] : [])
+  ];
 
   return {
     badlyPlaced: null,
     deck,
     imageCache,
-    lives: 6,
+    lives: 3,
     next,
     nextButOne,
     played,
+    isGameOver: false,
   };
 }

@@ -2,7 +2,7 @@ import React from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { GameState } from "../types/game";
 import useAutoMoveSensor from "../lib/useAutoMoveSensor";
-import { checkCorrect, getRandomItem, preloadImage } from "../lib/items";
+import { checkCorrect, getNextItem, preloadImage } from "../lib/items";
 import NextItemList from "./next-item-list";
 import PlayedItemList from "./played-item-list";
 import styles from "../styles/board.module.scss";
@@ -32,6 +32,8 @@ export default function Board(props: Props) {
 
     const { source, destination } = result;
 
+    console.log("Drag Event:", { source, destination });
+
     if (
       !destination ||
       state.next === null ||
@@ -45,22 +47,41 @@ export default function Board(props: Props) {
     if (source.droppableId === "next" && destination.droppableId === "played") {
       const newDeck = [...state.deck];
       const newPlayed = [...state.played];
-      const { correct, delta } = checkCorrect(
-        newPlayed,
-        item,
-        destination.index
-      );
+
+      const { correct, delta } = checkCorrect(newPlayed, item, destination.index);
+
       newPlayed.splice(destination.index, 0, {
         ...state.next,
         played: { correct },
       });
 
+      // Remove the played item from the newDeck
+      const indexToRemove = newDeck.findIndex(
+        (deckItem) => deckItem.id === state.next?.id
+      );
+      if (indexToRemove !== -1) {
+        newDeck.splice(indexToRemove, 1);
+      }
+
       const newNext = state.nextButOne;
-      const newNextButOne = getRandomItem(
+      const newNextButOne = getNextItem(
         newDeck,
         newNext ? [...newPlayed, newNext] : newPlayed
       );
-      const newImageCache = [preloadImage(newNextButOne.image)];
+
+      const newImageCache = newNextButOne
+        ? [preloadImage(newNextButOne.image)]
+        : [];
+
+      console.log("newDeck length:", newDeck.length);
+      console.log("newNext:", newNext);
+      console.log("newNextButOne:", newNextButOne);
+      console.log("Lives left:", state.lives);
+
+      const newLives = correct ? state.lives : state.lives - 1;
+      const isGameOver = newLives <= 0 || (newNext === null && newNextButOne === null);
+
+      console.log("isGameOver:", isGameOver);
 
       setState({
         ...state,
@@ -69,7 +90,7 @@ export default function Board(props: Props) {
         next: newNext,
         nextButOne: newNextButOne,
         played: newPlayed,
-        lives: correct ? state.lives : state.lives - 1,
+        lives: newLives,
         badlyPlaced: correct
           ? null
           : {
@@ -77,6 +98,7 @@ export default function Board(props: Props) {
               rendered: false,
               delta,
             },
+        isGameOver,
       });
     } else if (
       source.droppableId === "played" &&
@@ -128,16 +150,8 @@ export default function Board(props: Props) {
       <div className={styles.wrapper}>
         <div className={styles.top}>
           <Hearts lives={state.lives} />
-          {state.lives > 0 ? (
-            <>
-              <NextItemList next={state.next} />
-            </>
-          ) : (
-            <GameOver
-              highscore={highscore}
-              resetGame={resetGame}
-              score={score}
-            />
+          {state.lives > 0 && state.next && (
+            <NextItemList next={state.next} />
           )}
         </div>
         <div id="bottom" className={styles.bottom}>
@@ -149,6 +163,16 @@ export default function Board(props: Props) {
             items={state.played}
           />
         </div>
+        {/* Overlay GameOver just above the timeline */}
+        {state.isGameOver && (
+          <div className={styles.gameOverOverlay}>
+            <GameOver
+              highscore={highscore}
+              resetGame={resetGame}
+              score={score}
+            />
+          </div>
+        )}
       </div>
     </DragDropContext>
   );

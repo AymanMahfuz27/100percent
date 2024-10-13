@@ -1,20 +1,3 @@
-# next-env.d.ts
-/// <reference types="next" />
-/// <reference types="next/image-types/global" />
-
-// NOTE: This file should not be edited
-// see https://nextjs.org/docs/basic-features/typescript for more information.
-
-
-# @types\tween-functions.d.ts
-declare module "tween-functions" {
-  export const easeOutCirc: (
-    currentTime: number,
-    beginValue: number,
-    endValue: number,
-    totalDuration: number
-  ) => number;
-}
 
 
 # components\board.tsx
@@ -22,7 +5,7 @@ import React from "react";
 import { DragDropContext, DropResult } from "react-beautiful-dnd";
 import { GameState } from "../types/game";
 import useAutoMoveSensor from "../lib/useAutoMoveSensor";
-import { checkCorrect, getRandomItem, preloadImage } from "../lib/items";
+import { checkCorrect, getNextItem, preloadImage } from "../lib/items";
 import NextItemList from "./next-item-list";
 import PlayedItemList from "./played-item-list";
 import styles from "../styles/board.module.scss";
@@ -65,22 +48,38 @@ export default function Board(props: Props) {
     if (source.droppableId === "next" && destination.droppableId === "played") {
       const newDeck = [...state.deck];
       const newPlayed = [...state.played];
+
       const { correct, delta } = checkCorrect(
         newPlayed,
         item,
         destination.index
       );
+
       newPlayed.splice(destination.index, 0, {
         ...state.next,
         played: { correct },
       });
 
+      // Remove the played item from the newDeck
+      const indexToRemove = newDeck.findIndex(
+        (deckItem) => deckItem.id === state.next?.id
+      );
+      if (indexToRemove !== -1) {
+        newDeck.splice(indexToRemove, 1);
+      }
+
       const newNext = state.nextButOne;
-      const newNextButOne = getRandomItem(
+      const newNextButOne = getNextItem(
         newDeck,
         newNext ? [...newPlayed, newNext] : newPlayed
       );
-      const newImageCache = [preloadImage(newNextButOne.image)];
+      const newImageCache = newNextButOne
+        ? [preloadImage(newNextButOne.image)]
+        : [];
+
+      // Update the isGameOver condition
+      const newLives = correct ? state.lives : state.lives - 1;
+      const isGameOver = newLives <= 0 || (newDeck.length === 0 && newNext === null && newNextButOne === null);
 
       setState({
         ...state,
@@ -89,7 +88,7 @@ export default function Board(props: Props) {
         next: newNext,
         nextButOne: newNextButOne,
         played: newPlayed,
-        lives: correct ? state.lives : state.lives - 1,
+        lives: newLives,
         badlyPlaced: correct
           ? null
           : {
@@ -97,6 +96,7 @@ export default function Board(props: Props) {
               rendered: false,
               delta,
             },
+        isGameOver,
       });
     } else if (
       source.droppableId === "played" &&
@@ -139,6 +139,17 @@ export default function Board(props: Props) {
     }
   }, [score, highscore, updateHighscore]);
 
+  // Render GameOver component if the game is over
+  if (state.isGameOver || state.lives <= 0) {
+    return (
+      <GameOver
+        highscore={highscore}
+        resetGame={resetGame}
+        score={score}
+      />
+    );
+  }
+
   return (
     <DragDropContext
       onDragEnd={onDragEnd}
@@ -148,17 +159,7 @@ export default function Board(props: Props) {
       <div className={styles.wrapper}>
         <div className={styles.top}>
           <Hearts lives={state.lives} />
-          {state.lives > 0 ? (
-            <>
-              <NextItemList next={state.next} />
-            </>
-          ) : (
-            <GameOver
-              highscore={highscore}
-              resetGame={resetGame}
-              score={score}
-            />
-          )}
+          <NextItemList next={state.next} />
         </div>
         <div id="bottom" className={styles.bottom}>
           <PlayedItemList
@@ -172,32 +173,10 @@ export default function Board(props: Props) {
       </div>
     </DragDropContext>
   );
+
+  
 }
 
-
-# components\button.tsx
-import React from "react";
-import classNames from "classnames";
-import styles from "../styles/button.module.scss";
-
-interface Props {
-  minimal?: boolean;
-  onClick: () => void;
-  text: string;
-}
-
-export default function Button(props: Props) {
-  const { minimal = false, onClick, text } = props;
-
-  return (
-    <button
-      onClick={onClick}
-      className={classNames(styles.button, { [styles.minimal]: minimal })}
-    >
-      {text}
-    </button>
-  );
-}
 
 
 # components\game-over.tsx
@@ -270,64 +249,15 @@ export default function GameOver(props: Props) {
 
 # components\game.tsx
 import React, { useState } from "react";
-import axios from "axios";
 import { GameState } from "../types/game";
 import { Item } from "../types/item";
 import createState from "../lib/create-state";
 import Board from "./board";
 import Loading from "./loading";
 import Instructions from "./instructions";
-import badCards from "../lib/bad-cards";
 
 const data = {
-"Republicans say they would be pleased if the supreme court reduced abortion rights?": 43,
-"Republicans say that abortion should never be permitted?": 19,
-"Republicans are willing to open up protected nature areas for economic development?": 16,
-"Republicans say that the US spends too much on alternative energy sources?": 23,
-"Republicans support laws that protect gays and lesbians against job discrimination?": 81,
-"Republicans support requiring background checks for gun purchases at gun shows or private sales?": 82,
-"Republicans say that the government should make it easier to buy a gun?": 11,
-"Republicans say that the US spends too much on the nation's health?": 16,
-"Republicans support making all unauthorized immigrants felons and sending them back?": 24,
-"Republicans support sending back children who were brought to the US illegally and have lived here for 10+ years?": 21,
-"Republicans say that the federal minimum wage should be decreased?": 4,
-"Republicans oppose requiring employers to offer paid leave to parents of new children?": 13,
-"Republicans say that the police officers never use more force than necessary?": 3,
-"Republicans support requiring police officers to wear body cameras while on duty?": 88,
-"Republicans say that blacks face no discrimination at all in the US?": 5,
-"Republicans believe that the legacy of slavery affects the position of black people in society today?": 68,
-"Republicans think that high-income individuals pay the right amount in taxes?": 29,
-"Republicans say that eligible voters are never denied the right to vote?": 23,
-"Democrats believe that climate change has been mostly due to human activity?": 69,
-"Democrats are unwilling to pay much higher prices in order to protect the environment?": 17,
-"Democrats support the death penalty for convicted murderers?": 44,
-"Democrats oppose making free trade agreements with other countries?": 7,
-"Democrats support lowering the eligibility age for Medicare from 65 to 50?": 77,
-"Democrats feel that courts deal too harshly with criminals?": 40,
-"Democrats say that the US spends too much on reducing crime rates?": 8,
-"Democrats believe that the legacy of slavery affects the position of black people in society today?": 97,
-"Democrats think that high-income individuals pay too little in taxes?": 75,
-"Democrats say that transgender people face no discrimination at all in the US?": 7,
-"Democrats support requiring showing a government photo ID when voting?": 48,
-"Democrats say that eligible voters are never denied the right to vote?": 7,
-"Democrats say that the US spends too little on assistance to the poor?": 44,
-"Adults say they would like to bring back dinosaurs?": 12,
-"Adults say that chocolate glazed donuts are their favorite donuts?": 12,
-"Adults in a relationship met their partner online?": 12,
-"Adults have at least one tattoo?": 26,
-"Adults are single?": 31,
-"Adults consider a hotdog to be a sandwich?": 36,
-"Adults believe in ghosts?": 36,
-"Adults like their eggs scrambled?": 37,
-"Adults believe in UFOs?": 39,
-"Dog owners got their dogs from a shelter?": 40,
-"Adults set an alarm but do not snooze when waking up?": 40,
-"Pet owners dress up their pets for Halloween?": 45,
-"Adults say they drink coffee every day?": 62,
-"TV-owning adults watched Neil Armstrong set foot on the moon?": 94,
-"Adults say they have had a teacher who changed their life for the better?": 94,
-"Households are dog owners?": 54,
-"Adults in a relationship say they are satisfied with their relationship?": 94,
+//game data here...
 };
 
 const items: Item[] = Object.entries(data).map(([label, percentage], index) => ({
@@ -352,7 +282,8 @@ export default function Game() {
 
   React.useEffect(() => {
     const initializeGameState = async () => {
-      setState(await createState(items));
+      const initialState = await createState(items);
+      setState({ ...initialState, isGameOver: false }); // Ensure isGameOver is false
       setLoaded(true);
     };
 
@@ -361,9 +292,11 @@ export default function Game() {
 
   const resetGame = React.useCallback(() => {
     (async () => {
-      setState(await createState(items));
+      const initialState = await createState(items);
+      setState({ ...initialState, isGameOver: false }); // Reset isGameOver on game reset
     })();
   }, []);
+
 
   const [highscore, setHighscore] = React.useState<number>(
     Number(localStorage.getItem("highscore") ?? "0")
@@ -393,213 +326,7 @@ export default function Game() {
       updateHighscore={updateHighscore}
     />
   );
-}
 
-# components\hearts.tsx
-import { useSpring, animated } from "react-spring";
-import React from "react";
-import styles from "../styles/hearts.module.scss";
-
-interface HeartProps {
-  have: boolean;
-}
-
-function Heart(props: HeartProps) {
-  const { have } = props;
-  const { opacity } = useSpring({
-    opacity: have ? 1 : 0.4,
-    config: { duration: 300 },
-  });
-  const { scale } = useSpring({
-    scale: have ? 1 : 0.8,
-    config: { mass: 1, tension: 200, friction: 20, duration: 300 },
-    delay: 200,
-  });
-
-  return (
-    <animated.img
-      className={styles.heart}
-      style={{ opacity, scale }}
-      src="/images/heart.svg"
-    />
-  );
-}
-
-interface Props {
-  lives: number;
-}
-
-export default function Hearts(props: Props) {
-  const { lives } = props;
-
-  return (
-    <div className={styles.hearts}>
-      <Heart have={lives >= 1} />
-      <Heart have={lives >= 2} />
-      <Heart have={lives >= 3} />
-      <Heart have={lives >= 4} />
-      <Heart have={lives >= 5} />
-      <Heart have={lives >= 6} />
-    </div>
-  );
-}
-
-
-# components\instructions.tsx
-import React from "react";
-import GitHubButton from "react-github-btn";
-import styles from "../styles/instructions.module.scss";
-import Button from "./button";
-import Score from "./score";
-
-interface Props {
-  highscore: number;
-  start: () => void;
-}
-
-export default function Instructions(props: Props) {
-  const { highscore, start } = props;
-
-  return (
-    <div className={styles.instructions}>
-      <div className={styles.wrapper}>
-        <h2>Place the cards on the timeline in the correct order.</h2>
-        {highscore !== 0 && (
-          <div className={styles.highscoreWrapper}>
-            <Score score={highscore} title="Best streak" />
-          </div>
-        )}
-        <Button onClick={start} text="Start game" />
-        <div className={styles.about}>
-          <div>
-            All data sourced from{" "}
-            <a
-              href="https://www.wikidata.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikidata
-            </a>{" "}
-            and{" "}
-            <a
-              href="https://www.wikipedia.org"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikipedia
-            </a>
-            .
-          </div>
-          <div>
-            Have feedback? Please report it on{" "}
-            <a
-              href="https://github.com/tom-james-watson/wikitrivia/issues/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              GitHub
-            </a>
-            .
-          </div>
-          <GitHubButton
-            href="https://github.com/tom-james-watson/wikitrivia"
-            data-size="large"
-            data-show-count="true"
-            aria-label="Star tom-james-watson/wikitrivia on GitHub"
-          >
-            Star
-          </GitHubButton>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
-# components\item-card.tsx
-import React from "react";
-import classNames from "classnames";
-import { Draggable } from "react-beautiful-dnd";
-import { Item, PlayedItem } from "../types/item";
-import styles from "../styles/item-card.module.scss";
-
-type Props = {
-  draggable?: boolean;
-  flippedId?: null | string;
-  index: number;
-  item: Item | PlayedItem;
-  setFlippedId?: (flippedId: string | null) => void;
-};
-
-export default function ItemCard(props: Props) {
-  const { draggable, flippedId, index, item, setFlippedId } = props;
-
-  const flipped = item.id === flippedId;
-
-  return (
-    <Draggable draggableId={item.id} index={index} isDragDisabled={!draggable}>
-      {(provided, snapshot) => {
-        return (
-          <div
-            className={classNames(styles.itemCard, {
-              [styles.played]: "played" in item,
-              [styles.flipped]: flipped,
-              [styles.dragging]: snapshot.isDragging,
-            })}
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            onClick={() => {
-              if ("played" in item && setFlippedId) {
-                if (flipped) {
-                  setFlippedId(null);
-                } else {
-                  setFlippedId(item.id);
-                }
-              }
-            }}
-          >
-            <div className={styles.front}>
-              <div className={styles.top}>
-                <div className={styles.label}>{item.label}</div>
-              </div>
-              <div
-                className={classNames(styles.bottom, {
-                  [styles.correct]: "played" in item && item.played.correct,
-                  [styles.incorrect]: "played" in item && !item.played.correct,
-                })}
-              >
-                <span>
-                  {"played" in item ? `${item.year}%` : ""}
-                </span>
-              </div>
-            </div>
-            <div className={styles.back}>
-              <div className={styles.labelBack}>{item.label}</div>
-              <div className={styles.percentageBack}>
-                {item.year}%
-              </div>
-            </div>
-          </div>
-        );
-      }}
-    </Draggable>
-  );
-}
-
-
-# components\loading.tsx
-import React from "react";
-import Loader from "react-loader-spinner";
-import styles from "../styles/loading.module.scss";
-
-export default function Loading() {
-  return (
-    <div className={styles.loading}>
-      <h1>Loading</h1>
-      <Loader type="Oval" color="#006699" height={60} width={60} />
-    </div>
-  );
 }
 
 
@@ -700,592 +427,3 @@ export default function PlayedItemList(props: PlayedItemListProps) {
     </div>
   );
 }
-
-
-# components\score.tsx
-import React from "react";
-import styles from "../styles/score.module.scss";
-
-interface Props {
-  score: number;
-  title: string;
-}
-
-export default function Score(props: Props) {
-  const { score, title } = props;
-
-  let backgroundColor = "#ffffff";
-
-  if (score >= 20) {
-    backgroundColor = "#FFC940";
-  } else if (score >= 10) {
-    backgroundColor = "#A7B6C2";
-  } else if (score >= 1) {
-    backgroundColor = "#C99765";
-  }
-
-  return (
-    <div className={styles.score} style={{ backgroundColor }}>
-      <div className={styles.title}>{title}</div>
-      <div className={styles.value}>{score}</div>
-    </div>
-  );
-}
-
-
-# pages\index.tsx
-import React from "react";
-import Head from "next/head";
-import dynamic from "next/dynamic";
-
-const Game = dynamic(() => import("../components/game"), { ssr: false });
-
-export default function Index() {
-  return (
-    <>
-      <Head>
-        <title>Wikitrivia</title>
-        <link
-          rel="shortcut icon"
-          href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20100%20100%22%3E%3Ctext%20y%3D%22.9em%22%20font-size%3D%2290%22%3E%F0%9F%8F%9B%EF%B8%8F%3C%2Ftext%3E%3C%2Fsvg%3E"
-          type="image/svg+xml"
-        />
-      </Head>
-
-      <Game />
-    </>
-  );
-}
-
-
-# pages\_app.tsx
-import React from "react";
-import { AppProps } from "next/app";
-import { polyfill } from "seamless-scroll-polyfill";
-import "../styles/globals.scss";
-
-function App({ Component, pageProps }: AppProps) {
-  React.useEffect(() => {
-    polyfill();
-  }, []);
-
-  return <Component {...pageProps} />;
-}
-
-export default App;
-
-
-# styles\board.module.scss
-.wrapper {
-  display: grid;
-  grid-auto-columns: auto;
-  grid-template-rows: 350px auto;
-  width: 100%;
-  height: 100%;
-}
-
-.top {
-  grid-row: 1;
-}
-
-.bottom {
-  grid-row: 2;
-  overflow-x: auto;
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-
-
-# styles\button.module.scss
-@import "./variables";
-
-.button {
-  border: none;
-  background: $primary;
-  color: $text-light;
-  padding: 10px 24px;
-  border-radius: $button-border-radius;
-  cursor: pointer;
-  text-transform: uppercase;
-  font-weight: 700;
-  font-style: italic;
-  white-space: nowrap;
-  width: 140px;
-
-  &:hover {
-    filter: brightness(1.3);
-  }
-
-  &.minimal {
-    background: none;
-    border: 2px solid $primary;
-  }
-}
-
-
-# styles\game-over.module.scss
-@import "./variables";
-
-.gameOver {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 60px;
-
-  .scoresWrapper {
-    margin: 40px 0;
-    display: flex;
-    justify-content: space-evenly;
-
-    .score {
-      display: inline-block;
-
-      &:last-child {
-        margin-left: 20px;
-      }
-    }
-  }
-
-  .buttons {
-    display: flex;
-
-    > button {
-      &:not(:last-child) {
-        margin-right: 10px;
-      }
-    }
-  }
-}
-
-
-# styles\globals.scss
-@import "./variables.scss";
-@import "react-loader-spinner/dist/loader/css/react-spinner-loader.css";
-
-html,
-body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  color: $text;
-  font-size: 14px;
-  background: $background;
-}
-
-html,
-body,
-#__next {
-  width: 100%;
-  height: 100%;
-}
-
-body {
-  overscroll-behavior-y: contain;
-}
-
-a {
-  color: $text-link;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-
-# styles\hearts.module.scss
-@import "./variables";
-
-.hearts {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-
-  .heart {
-    height: 50px;
-    margin: 10px;
-  }
-}
-
-
-# styles\instructions.module.scss
-@import "./variables.scss";
-
-.instructions {
-  display: flex;
-  height: calc(100% - 100px);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  .wrapper {
-    padding: 0 20px;
-    text-align: center;
-
-    h2 {
-      color: $text-light;
-      font-style: italic;
-      text-transform: uppercase;
-      margin-bottom: 40px;
-    }
-
-    .highscoreWrapper {
-      margin: 40px 0;
-    }
-
-    .about {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      margin-bottom: 10px;
-      color: $text-light;
-
-      > div {
-        margin-bottom: 10px;
-      }
-
-      a {
-        color: $text-light;
-        margin-bottom: 10px;
-      }
-    }
-  }
-}
-
-
-# styles\item-card.module.scss
-@import "./variables";
-
-.itemCard {
-  display: inline-block;
-  width: 150px;
-  height: 200px;
-  margin-top: 20px;
-  margin-bottom: 20px;
-  margin-right: 20px;
-  position: relative;
-  perspective: 1000px; // Enable 3D space for flipping
-
-  .front,
-  .back {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; // Ensure the bottom stays at the bottom
-    position: absolute;
-    top: 0;
-    right: 0;
-    left: 0;
-    bottom: 0;
-    border-radius: $box-border-radius;
-    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px,
-      rgba(0, 0, 0, 0.23) 0px 6px 6px;
-    backface-visibility: hidden; // Hide the back face while not flipped
-    transition: transform 0.6s ease-in-out, background-color 0.3s ease-in-out;
-  }
-
-  .front {
-    background-color: #ffffff;
-    transform: rotateY(0);
-
-    .top {
-      padding: 15px 10px; // Increased padding at the top for better spacing
-    }
-
-    .bottom {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      line-height: 30px;
-      font-weight: 700;
-      background-color: $primary;
-      color: $text-light;
-      border-radius: 0 0 $box-border-radius $box-border-radius;
-      padding: 10px 0;
-      margin-top: auto; // Push the bottom to the bottom
-      width: 100%; // Make sure the bottom stretches fully
-      box-sizing: border-box; // Ensure the padding is considered within the width
-
-      &:hover {
-        background-color: #ad310b;
-      }
-
-      &.correct {
-        background-color: $correct; // Green color for correct
-      }
-
-      &.incorrect {
-        background-color: $incorrect; // Red color for incorrect
-      }
-    }
-  }
-
-  .back {
-    background-color: $text-muted; // Use muted color for the back
-    transform: rotateY(-180deg); // Start with the back side flipped out of view
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: $text-light; // Ensure text is visible on muted background
-    padding: 10px;
-    border-radius: $box-border-radius;
-
-    .labelBack {
-      font-size: 16px;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    .percentageBack {
-      font-size: 32px; // Make the percentage larger
-      font-weight: bold;
-      text-align: center;
-    }
-  }
-
-  &.dragging {
-    .front,
-    .back {
-      &::after {
-        opacity: 1;
-      }
-    }
-  }
-
-  &.played {
-    .front,
-    .back {
-      cursor: pointer;
-    }
-  }
-
-  &.flipped {
-    .front {
-      transform: rotateY(180deg); // Flip the front out of view
-      z-index: -1;
-    }
-
-    .back {
-      transform: rotateY(0); // Ensure the back is shown when flipped
-      z-index: initial;
-    }
-  }
-
-  .label {
-    font-weight: bold;
-    word-wrap: break-word;
-    font-size: 14px; // Ensure the label text is appropriately sized
-    text-align: center;
-  }
-
-  .description {
-    margin-top: 5px;
-    font-size: 12px;
-    color: $text-muted;
-  }
-}
-
-
-# styles\loading.module.scss
-@import "./variables.scss";
-
-.loading {
-  display: flex;
-  height: calc(100% - 100px);
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
-  h1 {
-    color: $text-light;
-    margin-bottom: 20px;
-  }
-}
-
-
-# styles\next-item-list.module.scss
-@import "./variables.scss";
-
-.container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px 0;
-
-  .wrapper {
-    padding-left: 20px;
-    width: 192px;
-    position: relative;
-    border: 1px dashed $dashes;
-    border-radius: 5px;
-
-    .list {
-      height: 240px;
-    }
-  }
-}
-
-
-# styles\played-item-list.module.scss
-@import "./variables.scss";
-
-.wrapper {
-  width: min-content;
-  min-width: 100%;
-  height: 100%;
-
-  .listContainer {
-    width: min-content;
-    min-width: 100%;
-    padding: 0 40px 0 60px;
-    height: 100%;
-    position: relative;
-
-    .timelineContainer {
-      position: absolute;
-      left: 0;
-      width: 100%;
-
-      .timeline {
-        width: 100%;
-        height: 1px;
-        border: 1px dashed $dashes;
-        position: relative;
-
-        .lowestLabel,
-        .highestLabel {
-          position: fixed; // Change from absolute to fixed to make them stick
-          top: 575px; // Adjust as needed for visual alignment
-          font-size: 18px;
-          font-weight: bold;
-          color: $text;
-          rotate: -40deg; // Adjust rotation angle as needed
-          background-color: $primary;
-          padding: 5px 10px;
-          border-radius: 5px;
-          color: $text-light;
-          z-index: 1000; // Ensure the labels are always on top
-        }
-
-        .lowestLabel {
-          left: 10px; // Adjust this value for better placement if needed
-        }
-
-        .highestLabel {
-          right: 10px; // Adjust this value for better placement if needed
-        }
-      }
-    }
-
-    .list {
-      display: flex;
-      align-items: center;
-      justify-content: center; // Center the items within the list
-      height: 100%;
-
-      .items {
-        display: flex;
-        align-items: center;
-        justify-content: center; // Ensure the items are centered
-      }
-    }
-  }
-
-  @media screen and (max-width: 600px) {
-    .listContainer {
-      padding: 0;
-      padding-left: 20px;
-    }
-  }
-}
-
-
-# styles\score.module.scss
-@import "./variables.scss";
-
-.score {
-  display: inline-block;
-  transform: skewX(-12deg);
-  border-radius: $box-border-radius;
-  padding: 10px 24px;
-  text-align: left;
-
-  .title {
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 5px;
-    white-space: nowrap;
-  }
-
-  .value {
-    display: flex;
-    font-weight: 700;
-    font-size: 24px;
-  }
-}
-
-
-# styles\variables.scss
-$background: #ffffff;
-$text: #202122;
-$text-light: #ffffff;
-$text-muted: #0f141d;
-$text-link: #0645ad;
-$background-alt: #e1e8ed;
-$dashes: #5c7080;
-$incorrect: #990000;
-$correct: #339966;
-$primary: #053a55;
-$box-border-radius: 8px;
-$button-border-radius: 20px;
-
-
-# types\game.ts
-import { Item, PlayedItem } from "./item";
-
-export interface GameState {
-  badlyPlaced: {
-    index: number;
-    rendered: boolean;
-    delta: number;
-  } | null;
-  deck: Item[];
-  // If we don't keep a reference to the preloaded images they can end up being
-  // garbage collected.
-  imageCache: HTMLImageElement[];
-  lives: number;
-  next: Item | null;
-  nextButOne: Item | null;
-  played: PlayedItem[];
-}
-
-
-# types\item.ts
-export interface Item {
-  date_prop_id: string;
-  // description: string;
-  id: string;
-  image: string;
-  instance_of: string[];
-  label: string;
-  num_sitelinks: number;
-  occupations: string[] | null;
-  page_views: number;
-  wikipedia_title: string;
-  year: number;
-}
-
-export type PlayedItem = Item & {
-  played: {
-    correct: boolean;
-  };
-};
-

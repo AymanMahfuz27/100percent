@@ -15,6 +15,14 @@ export function getRandomItem(deck: Item[], played: Item[]): Item {
   return deck[Math.floor(Math.random() * deck.length)];
 }
 
+export function getNextItem(deck: Item[], played: Item[]): Item | null {
+  const playedIds = new Set(played.map((item) => item.id));
+  const nextItem = deck.find((item) => !playedIds.has(item.id));
+  return nextItem || null;
+}
+
+
+
 function tooClose(item: Item, played: Item[]) {
   let distance = (played.length < 40) ? 5 : 1;
   if (played.length < 11)
