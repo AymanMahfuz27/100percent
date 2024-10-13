@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "next build",
+    "build": "next build && next export",
     "dev": "next dev",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,scss,json,yml}\"",
     "lint": "eslint --max-warnings=0 --cache --ext .js,.ts,.tsx .",
@@ -21,6 +21,7 @@
     "react-loader-spinner": "^4.0.0",
     "react-spring": "^9.7.3",
     "seamless-scroll-polyfill": "^1.2.3",
+    "serve": "^14.2.3",
     "tween-functions": "^1.2.0"
   },
   "devDependencies": {
